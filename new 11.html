@@ -1,0 +1,59 @@
+<html>
+<head>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <style>
+    #map { height: 100vh; }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <script>
+    let map = L.map('map').setView([7.8731, 80.7718], 7); // Sri Lanka center
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+    }).addTo(map);
+
+    // Example places
+    let places = [
+      { name: "Colombo", coords: [6.9271, 79.8612] },
+      { name: "Kandy", coords: [7.2906, 80.6337] },
+      { name: "Battaramulla", coords: [6.9043, 79.9241] },
+      { name: "Nawinna", coords: [6.8575, 79.9175] },
+      { name: "Pannipitiya", coords: [6.8461, 79.9515] },
+      { name: "Maharagama", coords: [6.8450, 79.9313] }
+    ];
+    places.forEach(place => {
+      L.marker(place.coords).addTo(map).bindPopup("📍 " + place.name);
+    });
+
+    // Live location
+    let userMarker, accuracyCircle;
+    if (navigator.geolocation) {
+      navigator.geolocation.watchPosition(
+        (pos) => {
+          let lat = pos.coords.latitude;
+          let lng = pos.coords.longitude;
+
+          if (!userMarker) {
+            userMarker = L.marker([lat, lng]).addTo(map).bindPopup("📍 You are here");
+            accuracyCircle = L.circle([lat, lng], { radius: 1500, color: "lime", fillOpacity: 0.3 }).addTo(map);
+          } else {
+            userMarker.setLatLng([lat, lng]);
+            accuracyCircle.setLatLng([lat, lng]);
+          }
+
+          // 🔹 Always recenter map on live location
+          map.setView([lat, lng], 16);
+
+        },
+        (err) => { console.error(err); },
+        { enableHighAccuracy: true }
+      );
+    } else {
+      alert("Geolocation is not supported by this browser.");
+    }
+  </script>
+</body>
+</html>
+
